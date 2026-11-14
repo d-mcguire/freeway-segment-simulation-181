@@ -10,6 +10,7 @@ class Detector:
     total_crossings: int = 0
     interval_crossings: int = 0
     interval_speed_sum: float = 0.0
+    interval_inv_speed_sum: float = 0.0   # sum of 1/v, for space-mean speed
     total_speed_sum: float = 0.0
     records: list = field(default_factory=list)
 
@@ -32,6 +33,7 @@ class Detector:
                 self.interval_crossings += 1
 
                 self.interval_speed_sum += crossing_speed
+                self.interval_inv_speed_sum += 1.0 / crossing_speed
                 self.total_speed_sum += crossing_speed
 
     def record_interval(self, time_s, duration_s=None):
@@ -47,15 +49,27 @@ class Detector:
         else:
             average_speed = None
 
+        # Time-mean speed = arithmetic mean of crossing speeds (above).
+        # Space-mean speed = harmonic mean = count / sum(1/v); this is the
+        # speed that belongs in q = k * v.
+        if self.interval_crossings > 0 and self.interval_inv_speed_sum > 0:
+            space_mean_speed = (
+                self.interval_crossings / self.interval_inv_speed_sum
+            )
+        else:
+            space_mean_speed = None
+
         self.records.append({
             "time_s": time_s,
             "flow_veh_h": flow,
             "average_speed_mps": average_speed,
+            "space_mean_speed_mps": space_mean_speed,
             "vehicle_count": self.interval_crossings
         })
 
         self.interval_crossings = 0
         self.interval_speed_sum = 0.0
+        self.interval_inv_speed_sum = 0.0
 
     def print_summary(self, duration_s):
         average_flow = (
