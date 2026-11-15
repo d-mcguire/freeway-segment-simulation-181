@@ -1,3 +1,4 @@
+
 """Analysis of simulation results: tables across seeds and figures.
 
 Reads  results/runs_summary.csv  and the per-run folders written by
@@ -43,6 +44,9 @@ TABLE_METRICS = [
     ("min_accel_mps2", "Hardest braking (m/s^2)"),
     ("hard_brake_vehicle_steps", "Vehicle-steps below -3 m/s^2"),
     ("dist_n_affected", "Followers affected by disturbance (of 60)"),
+    ("dist_n_unrecovered", "Affected followers not recovered in observation window"),
+    ("dist_recovery_fraction", "Fraction of affected followers recovered"),
+    ("dist_actual_min_brake_mps2", "Strongest applied disturbance acceleration (m/s^2)"),
     ("dist_max_rank_affected", "Furthest follower affected (rank)"),
     ("dist_max_dip_mps", "Largest follower speed dip (m/s)"),
     ("dist_mean_dip_mps", "Mean follower speed dip (m/s)"),
