@@ -38,6 +38,7 @@ V_FREE_MPS = 30.0           # reference speed for delay accounting
 HARD_BRAKE_MPS2 = -3.0      # threshold for counting hard-braking vehicle-steps
 AFFECTED_DIP_MPS = 1.0      # a follower is "affected" if its speed dips more than this
 N_TRACKED = 60              # followers tracked behind the disturbance vehicle
+DISTURBANCE_WINDOW_S = 60.0  # measure follower responses only within 60 s of event
 
 
 @dataclass
@@ -48,7 +49,7 @@ class Scenario:
     duration_s: float = 1200.0
     warmup_s: float = 300.0             # metrics are measured after this time
 
-    mainline_demand_vph: float = 1500.0
+    mainline_demand_vph: float = 2000.0
     ramp_demand_vph: float = 400.0
 
     cv_penetration: float = 0.0
@@ -392,13 +393,15 @@ def run_scenario(sc, out_root="results", verbose=True):
     # its pre-disturbance speed. Recovery is measured only for affected followers,
     # from the moment of their own lowest speed until speed is back to >= 95 % of
     # the pre-disturbance value for 5 continuous seconds. Followers that leave the
-    # road first are censored (counted as unrecovered), not as recovered.
+    # road first or reach the 60 s observation limit are censored (counted as
+    # not observed to recover), not as recovered.
     profile_rows, dips, rec_after_min, rec_abs, max_rank_affected = [], [], [], [], 0
     if dist_id is not None:
         for vid in tracked:
             series = tracked_series[vid]
             pre = tracked_pre[vid]
-            after = [(tt, v) for tt, v in series if tt > dist_t0]
+            after = [(tt, v) for tt, v in series
+                     if dist_t0 < tt <= dist_t0 + DISTURBANCE_WINDOW_S]
             if not after:
                 continue
             t_min, v_min = min(after, key=lambda p: p[1])
@@ -574,7 +577,7 @@ def main():
     ap.add_argument("--no-disturbance", action="store_true")
     ap.add_argument("--disturbance-mile", type=float, default=2.0,
                     help="where along the road (miles) the braking vehicle is chosen")
-    ap.add_argument("--mainline-demand", type=float, default=1500.0)
+    ap.add_argument("--mainline-demand", type=float, default=2000.0)
     ap.add_argument("--ramp-demand", type=float, default=400.0)
     ap.add_argument("--sensor-dropout", type=float, default=0.0)
     ap.add_argument("--actuator-lag", type=float, default=0.3)
