@@ -9,7 +9,7 @@ at mile 2.5, connected vehicles (ACC) at 0/20/50/70 % penetration, braking distu
     python run_simulation.py --seeds 1 2 3 4 5 --ramp-control fixed alinea --trajectories
     python analysis.py                                     # tables + figures in results/
 
-Python 3.9+ (record your exact version: seeded shuffles/draws can differ across versions).
+Python 3.9+
 
 ## Files
 | file | role |
@@ -27,5 +27,5 @@ Python 3.9+ (record your exact version: seeded shuffles/draws can differ across 
 results/runs_summary.csv (one row per run), results/<scenario>/seed_<n>/*.csv, results/figures/*.png
 
 ## Known limitations
-See the notes in the chat/design record: merge model gives the mainline priority,
+See the notes in the design record: merge model gives the mainline priority,
 placeholder controller gains and ACC bounds, one lane, deterministic IDM drivers.
